@@ -1,0 +1,462 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  ShoppingCart, 
+  Wallet, 
+  Activity, 
+  Users, 
+  BrainCircuit, 
+  Search,
+  X,
+  Plus,
+  Minus,
+  Loader2
+} from 'lucide-react';
+import * as api from './services/api';
+
+export function App() {
+  const [restaurants, setRestaurants] = useState([]);
+  const [dishes, setDishes] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentView, setCurrentView] = useState('home');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cartOpen, setCartOpen] = useState(false);
+
+  // Fetch data on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [restaurantsRes, dishesRes] = await Promise.all([
+          api.getRestaurants(),
+          api.getDishes()
+        ]);
+        setRestaurants(restaurantsRes.data);
+        setDishes(dishesRes.data);
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const addToCart = (dish) => {
+    const dishId = dish._id || dish.id;
+    setCart(prev => {
+      const existing = prev.find(item => (item._id || item.id) === dishId);
+      if (existing) {
+        return prev.map(item => 
+          (item._id || item.id) === dishId 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...dish, quantity: 1 }];
+    });
+    setCartOpen(true);
+  };
+
+  const updateQuantity = (dishId, delta) => {
+    setCart(prev => prev.map(item => {
+      if ((item._id || item.id) === dishId) {
+        return { ...item, quantity: Math.max(0, item.quantity + delta) };
+      }
+      return item;
+    }).filter(item => item.quantity > 0));
+  };
+
+  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Filter restaurants based on search
+  const filteredRestaurants = restaurants.filter(restaurant => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      restaurant.name.toLowerCase().includes(query) ||
+      restaurant.cuisine.some(c => c.toLowerCase().includes(query)) ||
+      (restaurant.menu && restaurant.menu.some(dish => 
+        dish.name && dish.name.toLowerCase().includes(query)
+      ))
+    );
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading NutriDelish...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center bg-red-50 p-8 rounded-lg">
+          <p className="text-red-600 font-bold mb-2">Error loading data</p>
+          <p className="text-red-500 text-sm">{error}</p>
+          <p className="text-gray-500 text-xs mt-4">
+            Make sure the backend server is running on http://localhost:5000
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center gap-4">
+            {/* Logo */}
+            <div className="flex items-center cursor-pointer flex-shrink-0" onClick={() => setCurrentView('home')}>
+              <div className="bg-emerald-600 p-2 rounded-lg mr-2">
+                <Activity className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500 hidden sm:block">
+                NutriDelish
+              </span>
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex-1 max-w-md relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-full leading-5 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm transition-colors"
+                placeholder="Search restaurants or dishes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Desktop Nav */}
+            <div className="hidden md:flex space-x-6 flex-shrink-0">
+              <button
+                onClick={() => setCurrentView('home')}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  currentView === 'home' ? 'text-emerald-600 bg-emerald-50' : 'text-gray-500 hover:text-emerald-600'
+                }`}
+              >
+                <Activity size={18} className="inline mr-2" />
+                Food
+              </button>
+              <button
+                onClick={() => setCurrentView('ai')}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  currentView === 'ai' ? 'text-emerald-600 bg-emerald-50' : 'text-gray-500 hover:text-emerald-600'
+                }`}
+              >
+                <BrainCircuit size={18} className="inline mr-2" />
+                AI Advisor
+              </button>
+              <button
+                onClick={() => setCurrentView('group')}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  currentView === 'group' ? 'text-emerald-600 bg-emerald-50' : 'text-gray-500 hover:text-emerald-600'
+                }`}
+              >
+                <Users size={18} className="inline mr-2" />
+                Group
+              </button>
+            </div>
+
+            {/* Cart Button */}
+            <button 
+              type="button"
+              className="relative p-2 text-gray-600 hover:text-emerald-600 transition"
+              onClick={() => setCartOpen(true)}
+            >
+              <ShoppingCart className="h-6 w-6" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+        {/* Mobile Nav */}
+        <div className="md:hidden flex justify-around py-2 border-t bg-gray-50">
+          <button
+            onClick={() => setCurrentView('home')}
+            className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+              currentView === 'home' ? 'text-emerald-600 bg-emerald-50' : 'text-gray-500'
+            }`}
+          >
+            <Activity size={18} />
+          </button>
+          <button
+            onClick={() => setCurrentView('ai')}
+            className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+              currentView === 'ai' ? 'text-emerald-600 bg-emerald-50' : 'text-gray-500'
+            }`}
+          >
+            <BrainCircuit size={18} />
+          </button>
+          <button
+            onClick={() => setCurrentView('group')}
+            className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+              currentView === 'group' ? 'text-emerald-600 bg-emerald-50' : 'text-gray-500'
+            }`}
+          >
+            <Users size={18} />
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {currentView === 'home' && (
+          <div>
+            {/* Landing Page Hero Section */}
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-8 md:p-12 text-white shadow-2xl mb-8 relative overflow-hidden">
+              <div className="relative z-10">
+                <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                  Welcome to NutriDelish
+                </h1>
+                <p className="text-lg md:text-xl text-emerald-100 mb-6 max-w-2xl">
+                  Discover delicious, healthy meals delivered to your door. AI-powered recommendations, real-time tracking, and the best restaurants in town.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
+                    <div className="text-2xl font-bold">9+</div>
+                    <div className="text-sm text-emerald-100">Restaurants</div>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
+                    <div className="text-2xl font-bold">50+</div>
+                    <div className="text-sm text-emerald-100">Dishes</div>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
+                    <div className="text-2xl font-bold">24/7</div>
+                    <div className="text-sm text-emerald-100">Delivery</div>
+                  </div>
+                </div>
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-40 h-40 bg-black opacity-10 rounded-full blur-2xl"></div>
+            </div>
+
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">All Restaurants</h1>
+            {filteredRestaurants.length === 0 && !loading ? (
+              <div className="text-center py-20">
+                <Search size={48} className="mx-auto text-gray-300 mb-4" />
+                <h3 className="text-xl font-bold text-gray-500 mb-2">No restaurants found</h3>
+                <p className="text-gray-400 mb-4">Try changing your search term</p>
+                <p className="text-sm text-gray-500">
+                  {restaurants.length === 0 && (
+                    <>
+                      No restaurants in database. Run the seed script:<br />
+                      <code className="bg-gray-100 px-2 py-1 rounded text-xs">cd backend && node scripts/seed.js</code>
+                    </>
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="grid lg:grid-cols-2 gap-8">
+                {filteredRestaurants.map(restaurant => {
+                  const restaurantId = restaurant._id || restaurant.id;
+                  const menu = restaurant.menu || [];
+                  
+                  return (
+                    <div key={restaurantId} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="p-6 border-b border-gray-50">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-900">{restaurant.name}</h3>
+                            <p className="text-sm text-gray-500">{restaurant.cuisine?.join(' • ') || 'Restaurant'}</p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-lg text-xs font-bold">
+                              ★ {restaurant.rating || '4.5'}
+                            </span>
+                            <span className="text-xs text-gray-400">{restaurant.deliveryTime || 30} mins</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <div className="grid gap-4">
+                          {menu.slice(0, 4).map((dish, idx) => {
+                            const dishId = dish._id || dish.id || idx;
+                            return (
+                              <div key={dishId} className="flex gap-4 p-2 rounded-xl hover:bg-gray-50 transition">
+                                <div className="relative w-24 h-24 flex-shrink-0">
+                                  <img 
+                                    src={dish.image || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80'} 
+                                    alt={dish.name} 
+                                    className="w-full h-full object-cover rounded-xl" 
+                                  />
+                                  <div className="absolute bottom-1 right-1 bg-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow">
+                                    ₹{dish.price || 0}
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                                  <div>
+                                    <h4 className="font-bold text-gray-900 truncate">{dish.name}</h4>
+                                    <p className="text-xs text-gray-500 line-clamp-2 mt-1">{dish.description || ''}</p>
+                                  </div>
+                                  <div className="flex justify-between items-end mt-2">
+                                    <div className="flex gap-1">
+                                      {dish.tags?.slice(0, 2).map((tag, i) => (
+                                        <span key={i} className="text-[10px] px-2 py-1 rounded bg-gray-100 text-gray-600">
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <button 
+                                      onClick={() => addToCart(dish)}
+                                      className="bg-white text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold uppercase hover:bg-emerald-600 hover:text-white transition shadow-sm"
+                                    >
+                                      Add
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {menu.length > 4 && (
+                            <button className="w-full py-2 text-sm text-gray-500 font-medium hover:text-gray-900 border-t border-dashed">
+                              View {menu.length - 4} more items
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {currentView === 'ai' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl mb-8">
+              <h1 className="text-4xl font-bold mb-4 flex items-center">
+                <BrainCircuit className="mr-3 text-yellow-300" size={32} />
+                AI Food Advisor
+              </h1>
+              <p className="text-indigo-100 text-lg">
+                Get personalized food recommendations based on your mood, weather, and health goals.
+              </p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
+              <p className="text-gray-600">AI recommendation feature coming soon!</p>
+              <p className="text-sm text-gray-400 mt-2">Connect to Gemini API to enable this feature</p>
+            </div>
+          </div>
+        )}
+
+        {currentView === 'group' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-orange-500 rounded-3xl p-8 text-white shadow-xl mb-8">
+              <h1 className="text-3xl font-bold mb-2">Group Ordering</h1>
+              <p className="text-orange-100">Order together and split the bill easily.</p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
+              <p className="text-gray-600">Group ordering feature coming soon!</p>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Cart Sidebar */}
+      {cartOpen && (
+        <div className="fixed inset-0 z-[100] overflow-hidden">
+          <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity" onClick={() => setCartOpen(false)}></div>
+          <div className="absolute inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col h-full transform animate-in slide-in-from-right">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-bold text-gray-900">Your Cart</h2>
+              <button onClick={() => setCartOpen(false)} className="text-gray-500 hover:text-gray-700">
+                <X />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4">
+              {cart.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                  <ShoppingCart size={48} className="mb-4 opacity-50"/>
+                  <p>Your cart is empty</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {cart.map((item, idx) => {
+                    const itemId = item._id || item.id || idx;
+                    return (
+                      <div key={itemId} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{item.name}</h4>
+                          <p className="text-sm text-gray-500">₹{item.price}</p>
+                        </div>
+                        <div className="flex items-center space-x-3 bg-white border rounded px-2 py-1">
+                          <button 
+                            onClick={() => updateQuantity(itemId, -1)} 
+                            className="text-gray-500 hover:text-red-500"
+                          >
+                            <Minus size={14}/>
+                          </button>
+                          <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateQuantity(itemId, 1)} 
+                            className="text-emerald-600 hover:text-emerald-700"
+                          >
+                            <Plus size={14}/>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  <div className="mt-6 border-t pt-4">
+                    <div className="flex justify-between font-bold text-lg text-gray-900 border-t border-dashed pt-2 mt-2">
+                      <span>Total</span>
+                      <span>₹{cartTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {cart.length > 0 && (
+              <div className="p-4 border-t bg-gray-50">
+                <button 
+                  type="button"
+                  onClick={() => {
+                    alert('Order placed! (This is a demo - connect to backend API to process orders)');
+                    setCart([]);
+                    setCartOpen(false);
+                  }}
+                  className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition flex justify-between px-6"
+                >
+                  <span>Total: ₹{cartTotal.toFixed(0)}</span>
+                  <span>Proceed to Pay</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
