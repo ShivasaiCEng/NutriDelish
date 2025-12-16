@@ -429,15 +429,31 @@ const LandingPage = ({ onGetStarted, allDishes = [] }) => {
                </div>
                <div className="grid grid-cols-2 gap-6">
                   <div className="bg-[#1a1a1a] p-6 rounded-3xl text-center border border-gray-800 hover:border-orange-500 transition duration-300">
-                     <div className="h-40 mb-4 rounded-2xl overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&w=500&q=60" className="w-full h-full object-cover hover:scale-110 transition duration-500"/>
+                     <div className="h-40 mb-4 rounded-2xl overflow-hidden bg-gray-700">
+                        <img 
+                           src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&h=400&fit=crop&q=80" 
+                           className="w-full h-full object-cover hover:scale-110 transition duration-500"
+                           alt="Restaurant interior"
+                           onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&h=400&fit=crop&q=80";
+                           }}
+                        />
                      </div>
                      <h3 className="font-bold text-lg mb-2">Got a Restaurant?</h3>
                      <a href="#" className="text-sm font-bold text-orange-500 hover:text-orange-400">Read More &rarr;</a>
                   </div>
                   <div className="bg-[#1a1a1a] p-6 rounded-3xl text-center border border-gray-800 hover:border-orange-500 transition duration-300 transform translate-y-8">
-                     <div className="h-40 mb-4 rounded-2xl overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1617347454431-f49d7ff5c3b1?auto=format&fit=crop&w=500&q=60" className="w-full h-full object-cover hover:scale-110 transition duration-500"/>
+                     <div className="h-40 mb-4 rounded-2xl overflow-hidden bg-gray-700">
+                        <img 
+                           src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=400&fit=crop&q=80" 
+                           className="w-full h-full object-cover hover:scale-110 transition duration-500"
+                           alt="Delivery bike"
+                           onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=500&h=400&fit=crop&q=80";
+                           }}
+                        />
                      </div>
                      <h3 className="font-bold text-lg mb-2">Got a Bike?</h3>
                      <a href="#" className="text-sm font-bold text-orange-500 hover:text-orange-400">Read More &rarr;</a>
@@ -482,9 +498,13 @@ const LandingPage = ({ onGetStarted, allDishes = [] }) => {
                <div className="relative order-first lg:order-none mb-12 lg:mb-0">
                   <div className="absolute inset-0 bg-orange-500 rounded-full opacity-10 blur-3xl transform scale-150"></div>
                   <img 
-                    src="https://images.unsplash.com/photo-1561758033-d8f19662cb23?auto=format&fit=crop&w=800&q=80" 
+                    src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=800&fit=crop&q=80" 
                     className="w-80 h-80 md:w-96 md:h-96 object-cover rounded-full mx-auto relative z-10 shadow-2xl hover:rotate-6 transition duration-700 border-8 border-white" 
                     alt="Center Burger"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&h=800&fit=crop&q=80";
+                    }}
                   />
                </div>
 
