@@ -1,169 +1,178 @@
-# NutriDelish - AI Food Platform
 
-A full-stack MERN (MongoDB, Express, React, Node.js) food delivery platform with AI-powered recommendations.
 
-## Project Structure
+---
+
+#  NutriDelish
+
+**NutriDelish** is a full-stack food delivery application that allows users to browse restaurants and dishes, place orders, and track delivery — built with a modern MERN-like stack. The project includes a **frontend web app** and a **backend API** to handle authentication, food data, and order management.
+
+---
+
+##  Demo & Links
+
+*  **Live Website:** [https://food-delivey-app-yi24.vercel.app/](https://food-delivey-app-yi24.vercel.app/)
+*  **Demo Video:** [https://youtu.be/DxwOWqCo354](https://youtu.be/DxwOWqCo354)
+*  **GitHub Repository:** [https://github.com/ShivasaiCEng/NutriDelish](https://github.com/ShivasaiCEng/NutriDelish) ([GitHub][1])
+
+---
+
+##  Overview
+
+NutriDelish provides:
+
+* A responsive web interface for browsing food items and restaurants
+* User authentication & order system
+* Backend API to manage data
+* Demo available online with video walkthrough
+
+
+
+---
+
+##  Project Structure
 
 ```
-nutridelish---ai-food-platform/
-├── backend/          # Express.js API server
-│   ├── models/      # MongoDB models
-│   ├── routes/      # API routes
-│   ├── scripts/     # Database seeding scripts
-│   └── server.js    # Server entry point
-├── frontend/         # React frontend
-│   ├── src/         # React source code
-│   │   ├── services/ # API service functions
-│   │   └── types.ts  # TypeScript types
-│   └── public/       # Static assets
-└── README.md         # This file
+NutriDelish/
+│
+├── backend/                          # Node/Express backend API
+│   ├── config/                       # Environment & configs
+│   ├── controllers/                  # Route logic handlers
+│   ├── middlewares/                  # Auth / error middlewares
+│   ├── models/                       # Database models (e.g., Users, Foods, Orders)
+│   ├── routes/                       # API endpoints
+│   ├── utils/                        # Utility functions
+│   ├── .env                          # Backend environment variables
+│   ├── package.json                  # Backend dependencies & scripts
+│   └── server.js                     # Server entry point
+│
+├── frontend/                         # React frontend application
+│   ├── public/                       # Static assets
+│   ├── src/                          # React source files
+│   │   ├── components/               # UI components
+│   │   ├── pages/                    # Page views (Home, Menu, Cart, etc.)
+│   │   ├── services/                 # API service layer (Axios)
+│   │   ├── styles/                   # Global UI styling (Tailwind/CSS)
+│   │   ├── App.jsx                   # React routes
+│   │   ├── main.jsx                  # React entry point
+│   │   └── index.css                 # Base styles
+│   ├── .env                          # Frontend environment settings
+│   ├── vite.config.js                # Vite configuration
+│   ├── package.json                  # Frontend dependencies & scripts
+│   └── tailwind.config.js            # Tailwind CSS config
+│
+├── .gitignore
+├── README.md                         # Project documentation (this file)
+├── package.json                      # Root package file
+└── metadata.json
 ```
 
-## Features
 
-- 🍔 Restaurant browsing and search
-- 🍕 Dish details with nutrition information
-- 🛒 Shopping cart functionality
-- 💳 Multiple payment methods (Wallet, UPI, Card, COD)
-- 🤖 AI-powered food recommendations using Google Gemini
-- 👥 Group ordering with bill splitting
-- 💰 Wallet management
-- 📦 Order tracking
-- 🎟️ Coupon system
-- 📊 Price history tracking
+---
 
-## Tech Stack
+##  Prerequisites
 
-### Backend
-- Node.js
-- Express.js
-- MongoDB with Mongoose
-- Google Gemini AI
+Make sure you have installed:
 
-### Frontend
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS
-- Axios
-- Recharts
-- Lucide React
+* **Node.js** (v18 or higher)
+* **npm** or **yarn**
+* A code editor like VS Code
 
-## Getting Started
+---
 
-### Prerequisites
+##  Installation
 
-- Node.js (v18 or higher)
-- MongoDB (local or MongoDB Atlas)
-- Google Gemini API key (optional, for AI features)
+Clone the repo:
 
-### Backend Setup
-
-1. Navigate to backend directory:
 ```bash
-cd backend
+git clone https://github.com/ShivasaiCEng/NutriDelish.git
+cd NutriDelish
 ```
 
-2. Install dependencies:
+Install root dependencies:
+
 ```bash
 npm install
 ```
 
-3. Create `.env` file:
-```env
+Install backend dependencies:
+
+```bash
+cd backend
+npm install
+```
+
+Install frontend dependencies:
+
+```bash
+cd ../frontend
+npm install
+```
+
+---
+
+##  Running the Application
+
+### Start Backend Server
+
+```bash
+cd backend
+npm start
+```
+
+*(Server typically runs on [http://localhost:5000](http://localhost:5000))*
+
+### Start Frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+*(Frontend runs by default at [http://localhost:5173](http://localhost:5173) with Vite)*
+
+---
+
+##  Environment Variables
+
+### Backend (`backend/.env`)
+
+Create a `.env` in the backend with:
+
+```
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/nutridelish
-GEMINI_API_KEY=your_gemini_api_key_here
-JWT_SECRET=your_jwt_secret_here
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
 ```
 
-4. Seed the database (optional):
-```bash
-node scripts/seed.js
-```
 
-5. Start the server:
-```bash
-npm run dev
-```
+---
 
-The backend will run on `http://localhost:5000`
+##  Features
 
-### Frontend Setup
+*  Browse restaurants & menus
+*  Add items to cart
+*  Place orders
+*  Responsive web UI
+*  Backend API for managing data
+*  group ordering via voting
+*  Disease-based filtering
+*  Mood based food reccomendation
 
-1. Navigate to frontend directory:
-```bash
-cd frontend
-```
+---
 
-2. Install dependencies:
-```bash
-npm install
-```
+##  Tech Stack
 
-3. Create `.env` file (optional):
-```env
-VITE_API_URL=http://localhost:5000/api
-```
+**Frontend:**
 
-4. Start the development server:
-```bash
-npm run dev
-```
+* React
+* Vite
+* Tailwind CSS
 
-The frontend will run on `http://localhost:3000`
+**Backend:**
 
-## API Endpoints
+* Node.js
+* Express.js
+* MongoDB / Mongoose
 
-### Restaurants
-- `GET /api/restaurants` - Get all restaurants
-- `GET /api/restaurants/:id` - Get restaurant by ID
-- `GET /api/restaurants/search/:query` - Search restaurants
 
-### Dishes
-- `GET /api/dishes` - Get all dishes
-- `GET /api/dishes/:id` - Get dish by ID
 
-### Orders
-- `GET /api/orders/user/:userId` - Get user orders
-- `POST /api/orders` - Create new order
-- `PATCH /api/orders/:id/status` - Update order status
-
-### Users
-- `POST /api/users/register` - Register new user
-- `POST /api/users/login` - Login user
-- `GET /api/users/:id` - Get user profile
-- `POST /api/users/:id/wallet/add` - Add money to wallet
-
-### Payments
-- `POST /api/payments/coupon/validate` - Validate coupon
-- `GET /api/payments/coupons` - Get all coupons
-
-### AI
-- `POST /api/ai/recommend` - Get AI food recommendation
-
-## Demo User
-
-After seeding the database, you can use:
-- Email: `demo@nutridelish.com`
-- Password: `demo123`
-
-## Development
-
-### Running Both Servers
-
-In separate terminals:
-
-```bash
-# Terminal 1 - Backend
-cd backend
-npm run dev
-
-# Terminal 2 - Frontend
-cd frontend
-npm run dev
-```
-
-## License
-
-ISC
